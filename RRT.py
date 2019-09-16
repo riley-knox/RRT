@@ -13,6 +13,7 @@ import pprint
 k = 50              #number of iterations
 d = 1               #defined step length; not used as variable as all steps are unit vectors (have inherent length = 1)
 pointsList = []     #blank list to hold point data; has form ['point name', point coordinates, 'parent point']
+segmentsList = []   #blank list to hold line segment endpoint coordinates
 
 #define distance calculation function
 def calcDist(x,y):
@@ -50,6 +51,10 @@ for i in range(1,k+1):
     #very closely taken from: https://thispointer.com/numpy-amin-find-minimum-value-in-numpy-array-and-its-index/
     closestIndex = int(np.where(distances == np.amin(distances))[0])
 
+    #determine/define coordinates of parent point
+    parentCoords = (pointsList[closestIndex][1][0],pointsList[closestIndex][1][1])
+    #print("parent coordinates:",parentCoords)  #CAN DELETE ONCE EVERYTHING WORKS
+
     #create vector from closest point to random point
     closestVector = [distX,distY]
 
@@ -70,15 +75,29 @@ for i in range(1,k+1):
     #add most recent point data to point data list
     pointsList.append(pointData)
 
+    #create line segment endpoints list entry
+    endpoints = [(parentCoords),(pointCoords)]
+
+    #add endpoints list entry to line segment data list
+    segmentsList.append(endpoints)
+
+#print line segment data list
+pprint.pprint(segmentsList)
+
 #print point data in an aesthetically pleasing manner
 pprint.pprint(pointsList)
 
-#plot points in scatter plot
-#generate x- and y-values
+#generate x- and y-values for scatter plot
 pointsX = [pointsList[i][1][0] for i in range(len(pointsList))]
 pointsY = [pointsList[i][1][1] for i in range(len(pointsList))]
-plt.scatter(pointsX,pointsY)
-#set axis limits
-plt.xlim(0,100)
-plt.ylim(0,100)
+
+#generate subplots to allow scatter and line plots on same figure with same axes
+fig, ax = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True)
+#create scatter plot
+fig = plt.scatter(pointsX,pointsY)
+#add line segments
+lineSegments = mpl.collections.LineCollection(segmentsList)
+ax.add_collection(lineSegments)
+
+#show RRT plot
 plt.show()
