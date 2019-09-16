@@ -53,8 +53,7 @@ for i in range(1,k+1):
 
     #determine/define coordinates of parent point
     parentCoords = (pointsList[closestIndex][1][0],pointsList[closestIndex][1][1])
-    #print("parent coordinates:",parentCoords)  #CAN DELETE ONCE EVERYTHING WORKS
-
+    
     #create vector from closest point to random point
     closestVector = [distX,distY]
 
