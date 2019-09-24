@@ -5,7 +5,6 @@ from __future__ import print_function
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
-import imageio
 import math
 import pprint
 
@@ -53,7 +52,7 @@ for i in range(1,k+1):
 
     #determine/define coordinates of parent point
     parentCoords = (pointsList[closestIndex][1][0],pointsList[closestIndex][1][1])
-    
+
     #create vector from closest point to random point
     closestVector = [distX,distY]
 
