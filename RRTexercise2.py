@@ -55,13 +55,6 @@ def pointtoLine((A,B,C),(x,y)):
     disttoLine = abs(((A*x) + (B*y) + C))/(math.sqrt(A**2 + B**2))
     return disttoLine
 
-#define function to check if there is a clear path to the endpoint
-#def isPathClear():
-#    pathDists = []          #empty list to hold distances from center of each obstacle to path from newest node to endpoint
-#    pathinObstacles = []    #empty list for strings indicating if path to endpoint intersects with each obstacle
-#    for i in range(len(obstaclesList)):
-
-
 #generate obstacles
 #number of obstacles
 N = 20
@@ -104,7 +97,7 @@ while True:
     #create end point in range 70-90 on both axes
     endX = 70 + 20*np.random.rand()                 #x coordinate
     endY = 70 + 20*np.random.rand()                 #y coordinate
-    print('end coordinates: ',(endX,endY))
+    #print('end coordinates: ',(endX,endY))         #CAN DELETE ONCE WORKING
     endCollisions = isinObstacle(endX,endY)         #establish collision case for each obstacle
     endYesorNo = any(endCollisions)                 #check if collision exists
     #print(endYesorNo)                  #CAN DELETE ONCE WORKING
@@ -128,12 +121,12 @@ while clearPath == False:
     #generate new nodes, checking for collisions with obstacles
     while True:
         pointName = "q{}".format(len(pointsList))
-        #print(len(pointsList))              #name of point being added - CAN DELETE ONCE WORKING
-        #print(pointName)
+        #print(len(pointsList))             #name of point being added - CAN DELETE ONCE WORKING
+        #print(pointName)                   #CAN DELETE ONCE WORKING
         #coordinates of random point
         randomX = np.random.randint(0,101)
         randomY = np.random.randint(0,101)
-        #print('random point: ',(randomX,randomY))
+        #print('random point: ',(randomX,randomY))      #CAN DELETE ONCE WORKING
         #blank list to hold point-to-point distances; clears each iteration
         distances = []
 
@@ -158,11 +151,14 @@ while clearPath == False:
         distX = randomX - pointsList[closestIndex][1][0]
         distY = randomY - pointsList[closestIndex][1][1]
         closestVector = [distX,distY]
-        #print('vector to closest point: ',closestVector)
+        #print('vector to closest point: ',closestVector) #CAN DELETE ONCE WORKING
+        #calculate magnitude of vector to closest point
+        magnitudeClosest = math.sqrt((distX**2)+(distY**2))
+        #print('magnitude: ',magnitudeClosest)  #CAN DELETE ONCE WORKING
 
         #calculate unit vector
-        unitVector = [dist/distance for dist in closestVector]
-        #print('unit vector: ',unitVector)
+        unitVector = [dist/magnitudeClosest for dist in closestVector]
+        #print('unit vector: ',unitVector)  #CAN DELETE ONCE WORKING
 
         #create parent point data entry
         parent = "q{}".format(closestIndex)
@@ -171,7 +167,7 @@ while clearPath == False:
         pointX = pointsList[closestIndex][1][0] + unitVector[0]
         pointY = pointsList[closestIndex][1][1] + unitVector[1]
         pointCoords = (pointX,pointY)
-        print('new point: ',pointCoords)
+        #print('new point: ',pointCoords)
 
         #determine if new point is in an obstacle
         pointCollisions = isinObstacle(pointCoords[0],pointCoords[1])
@@ -197,28 +193,43 @@ while clearPath == False:
 
     #calculate line equation between added node and end point
     lineCoefficients = lineEquation(pointCoords,(endX,endY))
-    print('A, B, C: ',lineCoefficients)
+    #print('A, B, C: ',lineCoefficients)         #CAN DELETE ONCE WORKING
 
-    #calculate distances from obstacle centers to node-end point line
+    #calculate distances from obstacle centers to node-end point line and check for intersection
     intersectConditions = []     #empty list to hold strings indicating intersection condition with each obstacle
     obstaclestoLine = []         #empty list to hold distances from obstacles to line
-    for i in range(len(obstaclesList)):
-        obstacleDistance = pointtoLine(lineCoefficients,obstaclesList[i][0])
+    for i in range(len(obstaclesList)):                 #check for intersection with each successive obstacle
+        obstacleDistance = pointtoLine(lineCoefficients,obstaclesList[i][0])        #normalized distance from line to obstacle center
         obstaclestoLine.append(obstacleDistance)        #CAN PROBABLY DELETE
-        if obstacleDistance <= obstaclesList[i][1]:
-            condition = True
-        else:
-            condition = False
-        intersectConditions.append(condition)
-    print(obstaclestoLine)
-    print(intersectConditions)
+        if obstacleDistance <= obstaclesList[i][1]:     #if distance to obstacle is less than radius of obstacle i
+            condition = True                            #line intersects obstacle
+        else:                                           #if distance is greater than obstacle radius
+            condition = False                           #line does not intersect
+        intersectConditions.append(condition)           #add intersection condition of obstacle i to list
+    #print(obstaclestoLine)          #normalized distances from line to each obstacle center - CAN DELETE ONCE WORKING
+    #print(intersectConditions)      #intersection condition with each successive obstacle - CAN DELETE ONCE WORKING
 
-    #check if obstacle-to-line distances are less than obstacle radii
+    #check if path to end point is clear - returns True if path is blocked
+    isPathBlocked = any(intersectConditions)
+    #print(isPathClear)
 
+    if isPathBlocked == True:
+        pass
+    else:
+        clearPath == False
+        print('Clear path from point {}!'.format(pointName))
+        break
 
+pprint.pprint(pointsList)
 
+#generate final line segment and add to list of line segments
+finalSegment = [pointCoords,(endX,endY)]
+#print(finalSegment)
+segmentsList.append(finalSegment)
 
-    break
+#generate x- and y-values for scatter plot
+pointsX = [pointsList[i][1][0] for i in range(len(pointsList))]
+pointsY = [pointsList[i][1][1] for i in range(len(pointsList))]
 
 #create subplots
 fig, ax = plt.subplots(nrows = 1, ncols = 1, sharex = True, sharey = True)
@@ -226,9 +237,14 @@ fig, ax = plt.subplots(nrows = 1, ncols = 1, sharex = True, sharey = True)
 obstacles = [plt.Circle(center, radius) for center,radius in zip(centers,radii)]
 patches = mpl.collections.PatchCollection(obstacles, facecolors = 'black')
 ax.add_collection(patches)
+#plot nodes
+plt.scatter(pointsX,pointsY)
 #plot start and end points
-plt.scatter(startX,startY,c=startColor,marker='x')
-plt.scatter(endX,endY,c=endColor,marker='+')
+plt.scatter(startX,startY,s=100,c=startColor,marker='x')
+plt.scatter(endX,endY,s=100,c=endColor,marker='+')
+#add line segments
+lineSegments = mpl.collections.LineCollection(segmentsList)
+ax.add_collection(lineSegments)
 #set title
 ax.set_title('RRT with Obstacles')
 #set axis limits
