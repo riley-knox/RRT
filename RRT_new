@@ -1,0 +1,96 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+import math
+import numpy as np
+import pprint
+
+def calc_distance(p_1, p_2):
+    """
+    Calculates distance between two points.
+
+    ARGUMENTS
+        p_1         Point 1 coordinates; tuple
+        p_2         Point 2 coordinates; tuple
+
+    OUTPUT
+        distance    Straight-line distance from p_1 -> p_2; scalar
+    """
+    distance = math.sqrt((p_2[0]-p_1[0])**2 + (p_2[1]-p_1[1])**2)
+    return distance
+
+def obstacle_check(p_check):
+    """
+    Checks whether a point is inside any of the obstacles.
+
+    ARGUMENTS
+        p_check     Point to check; tuple
+    """
+    # dist_list = []                    # distances to each obstacle center
+    in_obstacles = []                   # intersection condition (Boolean) with each obstacle
+    for ind_a in range(N):              # for each obstacle
+        # calculate distance from point to obstacle center
+        distance_to = calc_distance(OBSTACLE_PROPS[ind_a][0], p_check)
+        # check distance against obstacle radius
+        if distance_to <= OBSTACLE_PROPS[ind_a][1]:     # if radius > distance
+            in_obstacles.append(True)                   # mark point within obstacle
+        else:                                           # if distance > radius
+            in_obstacles.append(False)                  # mark point outside obstacle
+
+    return in_obstacles
+
+# generate obstacles
+N = 20                              # number of obstacles
+OBSTACLE_PROPS = []                 # list to hold obstacle centers/radii
+# x- and y-coordinates of obstacles
+OBSTACLES_X = 100*np.random.rand(N)
+OBSTACLES_Y = 100*np.random.rand(N)
+# list of obstacle center coordinates as tuples
+OBSTACLE_CENTERS = zip(OBSTACLES_X, OBSTACLES_Y)
+# obstacle radii
+OBSTACLE_RADII = 10*np.random.rand(N)
+# fill obstacle properties list
+for i in range(N):
+    props = [OBSTACLE_CENTERS[i], OBSTACLE_RADII[i]]
+    OBSTACLE_PROPS.append(props)
+# pprint.pprint(OBSTACLE_PROPS)
+
+# create start point
+START_OK = False
+while not START_OK:
+    """
+    MAKE MORE CONCISE
+    """
+    START_X = 10 + 20*np.random.rand()          # x-coordinate
+    START_Y = 10 + 20*np.random.rand()          # y-coordinate
+    START = (START_X, START_Y)                  # start point coordinates
+
+    START_COLLISIONS = obstacle_check(START)    # check for collision between
+                                                # start point and obstacles
+
+    if any(START_COLLISIONS):                   # if a collision with any obstacle exists
+        print('Start Point Collision!')         # say so; loop will re-run
+    else:                                       # if no collision exists
+        START_OK = True                         # clear to move forward
+# print(START)
+START_NAME = 'q0'
+POINTS = [START_NAME, START]
+print(POINTS)
+
+# create end point
+END_OK = False
+while not END_OK:
+    """
+    SAME ADJUSTMENTS AS ABOVE
+    """
+    END_X = 70 + 20*np.random.rand()            # x-coordinate
+    END_Y = 70 + 20*np.random.rand()            # y-coordinate
+    END = (END_X, END_Y)
+
+    END_COLLISIONS = obstacle_check(END)        # check for collisions between
+                                                # end point and obstacles
+
+    if any(END_COLLISIONS):
+        print('End Point Collision!')
+    else:
+        END_OK = True
