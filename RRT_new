@@ -2,6 +2,8 @@
 
 from __future__ import print_function
 import math
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
 import pprint
 
@@ -74,8 +76,8 @@ while not START_OK:
         START_OK = True                         # clear to move forward
 # print(START)
 START_NAME = 'q0'
-POINTS = [START_NAME, START]
-print(POINTS)
+POINTS = [[START_NAME, START]]
+# print(POINTS)
 
 # create end point
 END_OK = False
@@ -90,7 +92,82 @@ while not END_OK:
     END_COLLISIONS = obstacle_check(END)        # check for collisions between
                                                 # end point and obstacles
 
-    if any(END_COLLISIONS):
-        print('End Point Collision!')
-    else:
-        END_OK = True
+    if any(END_COLLISIONS):                     # if any collision exists
+        print('End Point Collision!')           # say so, loop will re-run
+    else:                                       # if no collision
+        END_OK = True                           # move forward
+
+SEGMENTS = []                       # empty list to hold path segments
+CLEAR_PATH = False
+while not CLEAR_PATH:
+    POINT_OK = False
+    # generate new node and check for collisions with obstacles
+    while not POINT_OK:
+        POINT_NAME = "q{}".format(len(POINTS))
+        # print(POINT_NAME)
+        # coordinates of random point
+        POINT_X = np.random.randint(0, 101)
+        POINT_Y = np.random.randint(0, 101)
+
+        # determine node closest to random point, distance to it, and its list index
+        MIN_DIST = 10e10                            # initial distance to closest node
+        for i in range(len(POINTS)):                # iterate through existing nodes
+            DIST_TO_POINT = calc_distance(POINTS[i][1], (POINT_X, POINT_Y))     # calculate distance to each node
+            if DIST_TO_POINT <= MIN_DIST:           # if distance to node is less than minimum distance
+                MIN_DIST = DIST_TO_POINT            # save distance to node as minimum distance
+                CLOSEST_NODE = i                    # save list index of closest node
+        # print(MIN_DIST)
+        # print(CLOSEST_POINT)
+
+        PARENT = "q{}".format(CLOSEST_NODE)         # "parent" node name
+        PARENT_COORDS = (POINTS[CLOSEST_NODE][1])   # "parent" node coordinates
+
+        # create vector from closest node to random point
+        D_X = POINT_X - POINTS[CLOSEST_NODE][1][0]
+        D_Y = POINT_Y - POINTS[CLOSEST_NODE][1][1]
+        SHORTEST_VECTOR = [D_X, D_Y]
+        # magnitude of vector to closest node
+        SHORTEST_MAG = math.sqrt((D_X**2)+(D_Y**2))
+        # calculate unit vector
+        UNIT_VECTOR = [dist/SHORTEST_MAG for dist in SHORTEST_VECTOR]
+
+        # coordinates of new node
+        NODE_X = POINTS[CLOSEST_NODE][1][0] + UNIT_VECTOR[0]
+        NODE_Y = POINTS[CLOSEST_NODE][1][1] + UNIT_VECTOR[1]
+        # print(NODE_X, NODE_Y)
+
+        # check for collisions with obstacles
+        NODE_COLLISIONS = obstacle_check((NODE_X, NODE_Y))
+
+        if any(NODE_COLLISIONS):                    # if collision exists
+            pass                                    # do nothing and re-run loop
+        else:                                       # if no collisions
+            POINT_OK = True                         # move forward
+
+    # add new node data to list
+    POINTS.append([POINT_NAME, (NODE_X, NODE_Y), PARENT])
+    # pprint.pprint(POINTS)
+
+    # add new path segment to list
+    SEGMENTS.append([PARENT_COORDS, (NODE_X, NODE_Y)])
+
+# create node plot points
+NODES_PLOT_X = [POINTS[a][1][0] for a in range(len(POINTS))]
+NODES_PLOT_Y = [POINTS[b][1][1] for b in range(len(POINTS))]
+
+# create image
+FIG, AX = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True, figsize=(6, 6))
+# plot obstacles as circular patch collection
+OBSTACLES = [plt.Circle(center, radius) for center, radius in zip(OBSTACLE_CENTERS, OBSTACLE_RADII)]
+PATCHES = mpl.collections.PatchCollection(OBSTACLES, facecolors='black')
+AX.add_collection(PATCHES)
+# plot start & end points
+plt.scatter(START[0], START[1], s=100, marker='x')
+plt.scatter(END[0], END[1], s=100, marker='+')
+# plot nodes
+plt.scatter(NODES_PLOT_X, NODES_PLOT_Y, s=5)
+
+plt.xlim(0, 100)        # axis limits
+plt.ylim(0, 100)
+
+plt.show()              # show image
