@@ -231,7 +231,7 @@ POINTS_COLOR = '#1691e5'            # color for all nodes/edges
 PATH_COLOR = '#c0120a'              # color of path nodes and segments
 
 # create image
-FIG, AX = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True, figsize=(9, 9))
+FIG, AX = plt.subplots(num = "Pathfinding RRT", nrows=1, ncols=1, sharex=True, sharey=True, figsize=(9, 9))
 # axis limits
 plt.xlim(0, 100)
 plt.ylim(0, 100)
