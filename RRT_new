@@ -90,9 +90,6 @@ for i in range(N):
 # create start point
 START_OK = False                                # condition for correctly-generated start point
 while not START_OK:
-    """
-    MAKE MORE CONCISE
-    """
     START_X = 10 + 20*np.random.rand()          # x-coordinate
     START_Y = 10 + 20*np.random.rand()          # y-coordinate
     START = (START_X, START_Y)                  # start point coordinates
@@ -104,16 +101,12 @@ while not START_OK:
         pass                                    # do nothing; loop will re-run
     else:                                       # if no collision exists
         START_OK = True                         # clear to move forward
-START_COLOR = '#1ca120'                         # start point color
 START_NAME = 'q0'                               # start point node name
 POINTS = [[START_NAME, START, 'None']]          # initialize point data list
 
 # create end point
 END_OK = False                                  # condition for correctly-generated end point
 while not END_OK:
-    """
-    SAME ADJUSTMENTS AS ABOVE
-    """
     END_X = 70 + 20*np.random.rand()            # x-coordinate
     END_Y = 70 + 20*np.random.rand()            # y-coordinate
     END = (END_X, END_Y)
@@ -125,7 +118,6 @@ while not END_OK:
         pass                                    # do nothing, loop will re-run
     else:                                       # if no collision
         END_OK = True                           # move forward
-END_COLOR = '#ff9b00'
 
 SEGMENTS = []                       # empty list to hold path segments
 CLEAR_PATH = False                  # "clear path to end point exists" condition
@@ -224,7 +216,6 @@ while not AT_START:                                                 # iterate un
             PARENT_NODE = POINTS[l][2]                              # new parent node
     if PARENT_NODE == 'None':                                       # once start point is reached
         AT_START = True                                             # move forward
-PATH_COLOR = '#c0120a'                                              # color of path nodes and segments
 
 # create node plot points
 NODES_PLOT_X = [POINTS[a][1][0] for a in range(len(POINTS))]
@@ -233,8 +224,18 @@ NODES_PLOT_Y = [POINTS[a][1][1] for a in range(len(POINTS))]
 PATH_PLOT_X = [PATH_POINTS[b][0] for b in range(len(PATH_POINTS))]
 PATH_PLOT_Y = [PATH_POINTS[b][1] for b in range(len(PATH_POINTS))]
 
+# plot colors
+START_COLOR = '#5dc91f'             # start point color
+END_COLOR = '#ff9b00'               # end point color
+POINTS_COLOR = '#1691e5'            # color for all nodes/edges
+PATH_COLOR = '#c0120a'              # color of path nodes and segments
+
 # create image
 FIG, AX = plt.subplots(nrows=1, ncols=1, sharex=True, sharey=True, figsize=(9, 9))
+# axis limits
+plt.xlim(0, 100)
+plt.ylim(0, 100)
+
 # plot obstacles as circular patch collection
 OBSTACLES = [plt.Circle(center, radius) for center, radius in zip(OBSTACLE_CENTERS, OBSTACLE_RADII)]
 PATCHES = mpl.collections.PatchCollection(OBSTACLES, facecolors='black')
@@ -242,18 +243,34 @@ AX.add_collection(PATCHES)
 # plot start & end points
 plt.scatter(START[0], START[1], s=100, c=START_COLOR, marker='+')
 plt.scatter(END[0], END[1], s=100, c=END_COLOR, marker='+')
-# plot nodes
-plt.scatter(NODES_PLOT_X, NODES_PLOT_Y, s=5)
-# plot node-to-node segments
-NODE_SEGMENTS = mpl.collections.LineCollection(SEGMENTS)
-AX.add_collection(NODE_SEGMENTS)
-# plot path nodes
-plt.scatter(PATH_PLOT_X, PATH_PLOT_Y, s=5, c=PATH_COLOR)
-# plot path node-to-node segments
-PATH_SEGMENTS = mpl.collections.LineCollection(PATH_SEGS, colors=PATH_COLOR)
-AX.add_collection(PATH_SEGMENTS)
 
-plt.xlim(0, 100)        # axis limits
-plt.ylim(0, 100)
+# plot all nodes/edges one by one
+for i in range(len(POINTS)):
+    # plot newest node
+    plt.scatter(NODES_PLOT_X[i], NODES_PLOT_Y[i], s=10, c=POINTS_COLOR)
+    if i > 0:
+        # plot newest edge
+        NODE_SEGMENTS = mpl.collections.LineCollection(SEGMENTS[i-1:i], colors=POINTS_COLOR)
+        AX.add_collection(NODE_SEGMENTS)
+    plt.pause(0.1)
+
+# plot final segment
+NODE_SEGMENTS = mpl.collections.LineCollection([SEGMENTS[-1], [END]], colors=POINTS_COLOR)
+AX.add_collection(NODE_SEGMENTS)
+plt.pause(0.1)
+
+for i in range(len(PATH_POINTS)):
+    # plot newest path node
+    plt.scatter(PATH_PLOT_X[i], PATH_PLOT_Y[i], s=10, c=PATH_COLOR)
+    if i > 0:
+        # plot newest edge
+        PATH_SEGMENTS = mpl.collections.LineCollection(PATH_SEGS[i-1:i], colors=PATH_COLOR)
+        AX.add_collection(PATH_SEGMENTS)
+    plt.pause(0.05)
+
+# plot final path segment
+PATH_SEGMENTS = mpl.collections.LineCollection([PATH_SEGS[-1], [END]], colors=PATH_COLOR)
+AX.add_collection(PATH_SEGMENTS)
+plt.pause(0.05)
 
 plt.show()              # show image

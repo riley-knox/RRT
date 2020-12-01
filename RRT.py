@@ -9,7 +9,7 @@ import math
 import pprint
 
 #program parameters
-k = 50              #number of iterations
+k = 200             #number of iterations
 d = 1               #defined step length; not used as variable as all steps are unit vectors (have inherent length = 1)
 pointsList = []     #blank list to hold point data; has form ['point name', point coordinates, 'parent point']
 segmentsList = []   #blank list to hold line segment endpoint coordinates
@@ -80,10 +80,10 @@ for i in range(1,k+1):
     segmentsList.append(endpoints)
 
 #print line segment data list
-pprint.pprint(segmentsList)
+# pprint.pprint(segmentsList)
 
 #print point data in an aesthetically pleasing manner
-pprint.pprint(pointsList)
+# pprint.pprint(pointsList)
 
 #generate x- and y-values for scatter plot
 pointsX = [pointsList[i][1][0] for i in range(len(pointsList))]
